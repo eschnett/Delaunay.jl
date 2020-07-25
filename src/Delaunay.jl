@@ -146,8 +146,10 @@ function delaunay_1d(vertices::Array{Float64,2})::Triangulation
     nsimplices = nvertices - 1
     simplices = Array{Int}(undef, nsimplices, 2)
     for i = 1:nsimplices
-        simplices[i, 1] = perm[i]
-        simplices[i, 2] = perm[i+1]
+        pi0 = perm[i]
+        pi1 = perm[i+1]
+        simplices[i, 1] = min(pi0, pi1)
+        simplices[i, 2] = max(pi0, pi1)
     end
 
     neighbors = Array{Int}(undef, nsimplices, dim + 1)

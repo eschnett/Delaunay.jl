@@ -67,6 +67,8 @@ function check_triangulation(tri::Triangulation)
         end
     end
 
+    # TODO: Check handedness of simplices
+
     @test size(tri.neighbors) == (nsimplices, dim + 1)
     for i = 1:nsimplices
         si = tri.simplices[i, :]
