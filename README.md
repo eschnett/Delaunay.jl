@@ -1,6 +1,7 @@
-# Delaunay: Find the Delaunay triangulation for a set of points
+# Delaunay / də lɔˈnɛ /: Find the Delaunay triangulation for a set of points
 
-* [GitHub](https://github.com/eschnett/Delaunay.jl): Source code repository
+* [GitHub](https://github.com/eschnett/Delaunay.jl): Source code
+  repository
 * [![GitHub CI](https://github.com/eschnett/Delaunay.jl/workflows/CI/badge.svg)](https://github.com/eschnett/Delaunay.jl/actions)
 
 This package finds the [Delaunay
