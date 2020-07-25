@@ -53,4 +53,4 @@ zlims!(scene, 0, 1)
 wireframe!(scene[end][1], color=(:black, 0.6), linewidth=5)
 ```
 
-The test cases also contain examples in higher dimensions.
+The test cases contain also examples in higher dimensions.
