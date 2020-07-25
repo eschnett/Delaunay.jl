@@ -1,0 +1,5 @@
+# Configuration file for Caliban.
+# This is a list by itself. Comments are fine, by the way.
+{
+    "julia_url": "https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.0-rc1-linux-x86_64.tar.gz"
+}
