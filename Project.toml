@@ -1,10 +1,14 @@
 name = "Delaunay"
 uuid = "07eb4e4e-0c6d-46ef-bc4e-83d5e5d860a9"
 authors = ["Erik Schnetter <schnetter@gmail.com>"]
-version = "1.0.0" 
+version = "1.0.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+PyCall = "1.91"
+julia = "1.4"
