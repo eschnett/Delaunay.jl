@@ -3,11 +3,7 @@ using LinearAlgebra
 using SparseArrays
 using Test
 
-
-
 const Dmax = 5
-
-
 
 # TODO: Move this into the library?
 """
@@ -20,9 +16,9 @@ function flatten(A::AbstractVector)::Matrix
     @assert D > 0
     T = typeof(A[1][1])
     B = Array{T}(undef, N, D)
-    for n = 1:N
+    for n in 1:N
         @assert length(A[n]) == D
-        for d = 1:D
+        for d in 1:D
             B[n, d] = A[n][d]
         end
     end
@@ -38,7 +34,7 @@ function volume(S::AbstractArray{T,2})::T where {T}
     N, D = size(S)
     @assert N == D + 1
     B = Array{T}(undef, N + 1, N + 1)
-    for i = 1:N+1, j = 1:N+1
+    for i in 1:(N + 1), j in 1:(N + 1)
         if i == N + 1 && j == N + 1
             B[i, j] = 0
         elseif i == N + 1 || j == N + 1
@@ -50,8 +46,6 @@ function volume(S::AbstractArray{T,2})::T where {T}
     return sqrt((-1)^(D + 1) * det(B) / (2^D * factorial(D)^2))
 end
 
-
-
 """
 Check consistency of result
 """
@@ -60,9 +54,9 @@ function check_triangulation(tri::Triangulation)
 
     nsimplices = size(tri.simplices, 1)
     @test size(tri.simplices, 2) == dim + 1
-    for i = 1:nsimplices
+    for i in 1:nsimplices
         si = tri.simplices[i, :]
-        for d = 1:dim+1
+        for d in 1:(dim + 1)
             @test 1 <= si[d] <= nvertices
         end
     end
@@ -70,7 +64,7 @@ function check_triangulation(tri::Triangulation)
     # TODO: Check handedness of simplices
 
     @test size(tri.neighbors) == (nsimplices, dim + 1)
-    for i = 1:nsimplices
+    for i in 1:nsimplices
         si = tri.simplices[i, :]
         for j in tri.neighbors[i, :]
             j == 0 && continue
@@ -84,7 +78,7 @@ function check_triangulation(tri::Triangulation)
     end
 
     @test size(tri.vertex_to_simplex) == (nvertices,)
-    for i = 1:nvertices
+    for i in 1:nvertices
         j = tri.vertex_to_simplex[i]
         @test 1 <= j <= nsimplices
         sj = tri.simplices[j, :]
@@ -93,10 +87,10 @@ function check_triangulation(tri::Triangulation)
 
     vnv = tri.vertex_neighbor_vertices
     @test size(vnv) == (nvertices, nvertices)
-    for j = 1:nvertices
+    return for j in 1:nvertices
         # Find all simplices containing vertex j
         nbs1 = Set{Int}()
-        for n = 1:nsimplices
+        for n in 1:nsimplices
             if j in tri.simplices[n, :]
                 for i in tri.simplices[n, :]
                     if i != j
@@ -111,12 +105,10 @@ function check_triangulation(tri::Triangulation)
     end
 end
 
-
-
-@testset "Orthogonal simplices D=$D" for D = 1:Dmax
+@testset "Orthogonal simplices D=$D" for D in 1:Dmax
     coords = NTuple{D,Float64}[]
     push!(coords, ntuple(d -> 0, D))
-    for n = 1:D
+    for n in 1:D
         push!(coords, ntuple(d -> d == n ? 1 : 0, D))
     end
     coords = flatten(coords)
@@ -130,15 +122,15 @@ end
     check_triangulation(mesh)
 
     V = 0.0
-    for i = 1:size(mesh.simplices, 1)
+    for i in 1:size(mesh.simplices, 1)
         s = mesh.simplices[i, :]
         V += volume(mesh.points[s, :])
     end
 end
 
-@testset "Hypercubes D=$D" for D = 1:Dmax
+@testset "Hypercubes D=$D" for D in 1:Dmax
     coords = NTuple{D,Float64}[]
-    for i = CartesianIndex(ntuple(d -> 0, D)):CartesianIndex(ntuple(d -> 1, D))
+    for i in CartesianIndex(ntuple(d -> 0, D)):CartesianIndex(ntuple(d -> 1, D))
         push!(coords, i.I)
     end
     coords = flatten(coords)
@@ -153,17 +145,17 @@ end
     check_triangulation(mesh)
 
     V = 0.0
-    for i = 1:size(mesh.simplices, 1)
+    for i in 1:size(mesh.simplices, 1)
         s = mesh.simplices[i, :]
         V += volume(mesh.points[s, :])
     end
     @test V ≈ 1
 end
 
-@testset "Random points D=$D" for D = 1:Dmax
+@testset "Random points D=$D" for D in 1:Dmax
     # Embed points into a hypercube
     coords = NTuple{D,Float64}[]
-    for i = CartesianIndex(ntuple(d -> 0, D)):CartesianIndex(ntuple(d -> 1, D))
+    for i in CartesianIndex(ntuple(d -> 0, D)):CartesianIndex(ntuple(d -> 1, D))
         push!(coords, i.I)
     end
     coords = [flatten(coords); rand(100, D)]
@@ -175,7 +167,7 @@ end
     check_triangulation(mesh)
 
     V = 0.0
-    for i = 1:size(mesh.simplices, 1)
+    for i in 1:size(mesh.simplices, 1)
         s = mesh.simplices[i, :]
         V += volume(mesh.points[s, :])
     end

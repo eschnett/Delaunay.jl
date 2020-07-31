@@ -5,15 +5,11 @@ using SparseArrays
 
 export Triangulation, delaunay
 
-
-
 const spatial = PyNULL()
 
 function __init__()
-    copy!(spatial, pyimport_conda("scipy.spatial", "scipy"))
+    return copy!(spatial, pyimport_conda("scipy.spatial", "scipy"))
 end
-
-
 
 """
    Triangulation
@@ -41,13 +37,9 @@ struct Triangulation
     vertex_neighbor_vertices::SparseMatrixCSC{Nothing,Int}
 end
 
-
-
 function Base.show(io::IO, tri::Triangulation)
-    println(
-        io,
-        "Triangulation of $(size(tri.points, 1)) vertices in $(size(tri.points, 2)) dimensions",
-    )
+    println(io,
+            "Triangulation of $(size(tri.points, 1)) vertices in $(size(tri.points, 2)) dimensions")
     println(io, "Coordinates of vertices:")
     println(io, "    ", tri.points)
     println(io, "Indices of simplices:")
@@ -56,11 +48,12 @@ function Base.show(io::IO, tri::Triangulation)
     println(io, "    ", tri.vertex_to_simplex)
     println(io, "Indices of facets of convex hull of the vertices:")
     println(io, "    ", tri.convex_hull)
-    println(io, "Indices of coplanar points, nearest facet, and nearest vertex:")
+    println(io,
+            "Indices of coplanar points, nearest facet, and nearest vertex:")
     println(io, "    ", isempty(tri.coplanar) ? "[]" : tri.coplanar)
     println(io, "Neighboring vertices of vertices:")
     vnv = tri.vertex_neighbor_vertices
-    for j = 1:size(vnv, 2)
+    return for j in 1:size(vnv, 2)
         print(io, "    [$j]: [")
         comma = ""
         for i0 in nzrange(vnv, j)
@@ -71,8 +64,6 @@ function Base.show(io::IO, tri::Triangulation)
         println(io, "]")
     end
 end
-
-
 
 """
     delaunay(vertices::Array{Float64, 2})::Triangulation
@@ -114,24 +105,14 @@ function delaunay(vertices::Array{Float64,2})::Triangulation
     # end
     # # We transpose I and J here
     # vertex_neighbor_vertices = sparse(J, I, V, nvertices, nvertices)
-    vertex_neighbor_vertices = SparseMatrixCSC{Nothing,Int}(
-        nvertices,
-        nvertices,
-        indptr,
-        indices,
-        fill(nothing, length(indices)),
-    )
-    return Triangulation(
-        points,
-        simplices,
-        neighbors,
-        equations,
-        transform,
-        vertex_to_simplex,
-        convex_hull,
-        coplanar,
-        vertex_neighbor_vertices,
-    )
+    vertex_neighbor_vertices = SparseMatrixCSC{Nothing,Int}(nvertices,
+                                                            nvertices, indptr,
+                                                            indices,
+                                                            fill(nothing,
+                                                                 length(indices)))
+    return Triangulation(points, simplices, neighbors, equations, transform,
+                         vertex_to_simplex, convex_hull, coplanar,
+                         vertex_neighbor_vertices)
 end
 
 function delaunay_1d(vertices::Array{Float64,2})::Triangulation
@@ -145,15 +126,15 @@ function delaunay_1d(vertices::Array{Float64,2})::Triangulation
 
     nsimplices = nvertices - 1
     simplices = Array{Int}(undef, nsimplices, 2)
-    for i = 1:nsimplices
+    for i in 1:nsimplices
         pi0 = perm[i]
-        pi1 = perm[i+1]
+        pi1 = perm[i + 1]
         simplices[i, 1] = min(pi0, pi1)
         simplices[i, 2] = max(pi0, pi1)
     end
 
     neighbors = Array{Int}(undef, nsimplices, dim + 1)
-    for i = 1:nsimplices
+    for i in 1:nsimplices
         neighbors[i, 1] = i == 1 ? 0 : i - 1
         neighbors[i, 2] = i == nsimplices ? 0 : i + 1
     end
@@ -162,7 +143,7 @@ function delaunay_1d(vertices::Array{Float64,2})::Triangulation
     transform = Array{Float64}(undef, 0, dim + 1, dim) # TODO
 
     vertex_to_simplex = Array{Int}(undef, nvertices)
-    for i = 1:nvertices
+    for i in 1:nvertices
         vertex_to_simplex[perm[i]] = i == nvertices ? nvertices - 1 : i
     end
 
@@ -176,34 +157,24 @@ function delaunay_1d(vertices::Array{Float64,2})::Triangulation
     I = Int[]
     J = Int[]
     V = Nothing[]
-    for i = 1:nvertices
+    for i in 1:nvertices
         if i > 1
             push!(I, perm[i])
-            push!(J, perm[i-1])
+            push!(J, perm[i - 1])
             push!(V, nothing)
         end
         if i < nvertices
             push!(I, perm[i])
-            push!(J, perm[i+1])
+            push!(J, perm[i + 1])
             push!(V, nothing)
         end
     end
     # We transpose I and J here
     vertex_neighbor_vertices = sparse(J, I, V, nvertices, nvertices)
-    return Triangulation(
-        points,
-        simplices,
-        neighbors,
-        equations,
-        transform,
-        vertex_to_simplex,
-        convex_hull,
-        coplanar,
-        vertex_neighbor_vertices,
-    )
+    return Triangulation(points, simplices, neighbors, equations, transform,
+                         vertex_to_simplex, convex_hull, coplanar,
+                         vertex_neighbor_vertices)
 end
-
-
 
 """
    inc!(A::AbstractArray)
