@@ -78,6 +78,7 @@ Algorithm: Uses SciPy's `Delaunay` function. See
 """
 function delaunay(vertices::Array{Float64,2})::Triangulation
     nvertices, dim = size(vertices)
+    @assert dim > 0
     dim == 1 && return delaunay_1d(vertices)
     py = spatial.Delaunay(vertices)
     points = convert(Array{Float64,2}, py."points")
