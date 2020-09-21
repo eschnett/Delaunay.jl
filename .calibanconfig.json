@@ -1,5 +1,5 @@
 # Configuration file for Caliban.
 # This is a list by itself. Comments are fine, by the way.
 {
-    "julia_version" : "1.5.0"
+    "julia_version" : "1.5.1"
 }

@@ -5,6 +5,9 @@ using Test
 
 const Dmax = 5
 
+# Set reproducible random number seed
+Random.seed!(0)
+
 # TODO: Move this into the library?
 """
 Convert a vector-of-vectors into a matrix
