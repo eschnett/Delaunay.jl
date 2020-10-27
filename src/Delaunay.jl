@@ -34,7 +34,7 @@ struct Triangulation
     "Indices of coplanar points and the corresponding indices of the nearest facet and the nearest vertex (ncoplanar, 3)"
     coplanar::Array{Int,2}
     "Neighboring vertices of vertices [neighbors, vertex]"
-    vertex_neighbor_vertices::SparseMatrixCSC{Nothing,Int}
+    vertex_neighbor_vertices::Union{Nothing,SparseMatrixCSC{Nothing,Int}}
 end
 
 function Base.show(io::IO, tri::Triangulation)
@@ -53,15 +53,19 @@ function Base.show(io::IO, tri::Triangulation)
     println(io, "    ", isempty(tri.coplanar) ? "[]" : tri.coplanar)
     println(io, "Neighboring vertices of vertices:")
     vnv = tri.vertex_neighbor_vertices
-    return for j in 1:size(vnv, 2)
-        print(io, "    [$j]: [")
-        comma = ""
-        for i0 in nzrange(vnv, j)
-            i = rowvals(vnv)[i0]
-            print(io, comma, i)
-            comma = ", "
+    if vnv === nothing
+        println(io, "    $vnv")
+    else
+        for j in 1:size(vnv, 2)
+            print(io, "    [$j]: [")
+            comma = ""
+            for i0 in nzrange(vnv, j)
+                i = rowvals(vnv)[i0]
+                print(io, comma, i)
+                comma = ", "
+            end
+            println(io, "]")
         end
-        println(io, "]")
     end
 end
 
@@ -76,11 +80,20 @@ vertices and `D` the spatial dimension.
 Algorithm: Uses SciPy's `Delaunay` function. See
 <https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html>.
 """
-function delaunay(vertices::Array{Float64,2})::Triangulation
+function delaunay(vertices::Array{Float64,2},
+                  options::Union{Nothing,Vector{Symbol}}=nothing)::Triangulation
     nvertices, dim = size(vertices)
     @assert dim > 0
     dim == 1 && return delaunay_1d(vertices)
-    py = spatial.Delaunay(vertices)
+    if options === nothing
+        if dim <= 4
+            options = [:Qbb, :Qc, :Qz, :Q12]
+        else
+            options = [:Qbb, :Qc, :Qz, :Qx, :Q12]
+        end
+    end
+    options = join(options, " ")
+    py = spatial.Delaunay(vertices; qhull_options=options)
     points = convert(Array{Float64,2}, py."points")
     simplices = inc!(convert(Array{Int,2}, py."simplices"))
     neighbors = inc!(convert(Array{Int,2}, py."neighbors"))
@@ -89,28 +102,19 @@ function delaunay(vertices::Array{Float64,2})::Triangulation
     vertex_to_simplex = inc!(convert(Array{Int,1}, py."vertex_to_simplex"))
     convex_hull = inc!(convert(Array{Int,2}, py."convex_hull"))
     coplanar = inc!(convert(Array{Int,2}, py."coplanar"))
-    indptr = inc!(convert(Array{Int,1}, get(py."vertex_neighbor_vertices", 0)))
-    indices = inc!(convert(Array{Int,1}, get(py."vertex_neighbor_vertices", 1)))
-    # # Convert to sparse matrix format
-    # I = Int[]
-    # J = Int[]
-    # V = Nothing[]
-    # for i = 1:length(indptr)-1
-    #     j0min = indptr[i]
-    #     j0max = indptr[i+1]
-    #     for j in indices[j0min:j0max-1]
-    #         push!(I, i)
-    #         push!(J, j)
-    #         push!(V, nothing)
-    #     end
-    # end
-    # # We transpose I and J here
-    # vertex_neighbor_vertices = sparse(J, I, V, nvertices, nvertices)
-    vertex_neighbor_vertices = SparseMatrixCSC{Nothing,Int}(nvertices,
-                                                            nvertices, indptr,
-                                                            indices,
-                                                            fill(nothing,
-                                                                 length(indices)))
+    if hasproperty(py, "vertex_neighbor_vertices")
+        indptr = inc!(convert(Array{Int,1},
+                              get(py."vertex_neighbor_vertices", 0)))
+        indices = inc!(convert(Array{Int,1},
+                               get(py."vertex_neighbor_vertices", 1)))
+        vertex_neighbor_vertices = SparseMatrixCSC{Nothing,Int}(nvertices,
+                                                                nvertices,
+                                                                indptr, indices,
+                                                                fill(nothing,
+                                                                     length(indices)))
+    else
+        vertex_neighbor_vertices = nothing
+    end
     return Triangulation(points, simplices, neighbors, equations, transform,
                          vertex_to_simplex, convex_hull, coplanar,
                          vertex_neighbor_vertices)

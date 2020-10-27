@@ -6,7 +6,8 @@
 
 This package finds the [Delaunay
 triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation)
-for a set of points in arbitrary dimensions. It uses
+for a set of points in arbitrary dimensions. It uses the Python
+package
 [`scipy.spatial.Delaunay`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html)
 to perform the actual calculation.
 
