@@ -1,15 +1,9 @@
 module Delaunay
 
-using PyCall
+using Qhull_jll
 using SparseArrays
 
 export Triangulation, delaunay
-
-const spatial = PyNULL()
-
-function __init__()
-    return copy!(spatial, pyimport_conda("scipy.spatial", "scipy"))
-end
 
 """
    Triangulation
@@ -191,6 +185,21 @@ function inc!(A)
         A[i] += 1
     end
     return A
+end
+
+################################################################################
+
+const boolT = Cuint
+const qhT = Cvoid
+const coordT = Cvoid
+const FILE = Cvoid
+
+function _delaunay(vertices::Array{Cdouble,2})
+    # int qh_new_qhull(qhT *qh, int dim, int numpoints, coordT *points,
+    #                  boolT ismalloc, char *qhull_cmd, FILE *outfile,
+    #                  FILE *errfile);
+    dim, numpoints = size(vertices)
+    ierr = ccall((:qh_new_qhull, :libqhull_r), Cint, (Ptr{qhT}, Cint, Cint, Ptr{coordT}, boolT, Ptr{Cchar}, Ptr{FILE}, Ptr{File}), qh, dim, numpoints, points, ismalloc, qhull_cmd, outfile, errfile)
 end
 
 end
