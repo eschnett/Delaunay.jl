@@ -34,7 +34,7 @@ struct Triangulation
     "Indices of coplanar points and the corresponding indices of the nearest facet and the nearest vertex (ncoplanar, 3)"
     coplanar::Array{Int,2}
     "Neighboring vertices of vertices [neighbors, vertex]"
-    vertex_neighbor_vertices::Union{Nothing,SparseMatrixCSC{Nothing,Int}}
+    vertex_neighbor_vertices::Union{Nothing,SparseMatrixCSC{Bool,Int}}
 end
 
 function Base.show(io::IO, tri::Triangulation)
@@ -103,15 +103,23 @@ function delaunay(vertices::Array{Float64,2},
     convex_hull = inc!(convert(Array{Int,2}, py."convex_hull"))
     coplanar = inc!(convert(Array{Int,2}, py."coplanar"))
     if hasproperty(py, "vertex_neighbor_vertices")
-        indptr = inc!(convert(Array{Int,1},
-                              get(py."vertex_neighbor_vertices", 0)))
-        indices = inc!(convert(Array{Int,1},
-                               get(py."vertex_neighbor_vertices", 1)))
-        vertex_neighbor_vertices = SparseMatrixCSC{Nothing,Int}(nvertices,
-                                                                nvertices,
-                                                                indptr, indices,
-                                                                fill(nothing,
-                                                                     length(indices)))
+        indptr = get(py."vertex_neighbor_vertices", 0)
+        indices = get(py."vertex_neighbor_vertices", 1)
+        n = length(indptr) - 1
+        nnz = length(indices)
+        I = Int[]
+        J = Int[]
+        sizehint!(I, nnz)
+        sizehint!(J, nnz)
+        for row in 1:n
+            for colptr in indptr[row]:(indptr[row + 1] - 1)
+                col = indices[colptr + 1] + 1
+                push!(I, row)
+                push!(J, col)
+            end
+        end
+        V = fill(true, nnz)
+        vertex_neighbor_vertices = sparse(I, J, V, n, n)
     else
         vertex_neighbor_vertices = nothing
     end
