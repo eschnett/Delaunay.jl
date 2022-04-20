@@ -26,5 +26,5 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/julia-buildpkg@latest
         env:
-          PYTHON:
+          PYTHON: ""
       - uses: julia-actions/julia-runtest@latest
