@@ -105,21 +105,21 @@ function delaunay(vertices::Array{Float64,2},
     if hasproperty(py, "vertex_neighbor_vertices")
         indptr = get(py."vertex_neighbor_vertices", 0)
         indices = get(py."vertex_neighbor_vertices", 1)
-        n = length(indptr) - 1
+        nvertices = length(indptr) - 1
         nnz = length(indices)
         I = Int[]
         J = Int[]
         sizehint!(I, nnz)
         sizehint!(J, nnz)
-        for row in 1:n
-            for colptr in indptr[row]:(indptr[row + 1] - 1)
-                col = indices[colptr + 1] + 1
-                push!(I, row)
-                push!(J, col)
+        for i in 1:nvertices
+            for jptr in indptr[i]:(indptr[i + 1] - 1)
+                j = indices[jptr + 1] + 1
+                push!(I, i)
+                push!(J, j)
             end
         end
         V = fill(true, nnz)
-        vertex_neighbor_vertices = sparse(I, J, V, n, n)
+        vertex_neighbor_vertices = sparse(I, J, V, nvertices, nvertices)
     else
         vertex_neighbor_vertices = nothing
     end
@@ -169,17 +169,17 @@ function delaunay_1d(vertices::Array{Float64,2})::Triangulation
     # Convert to sparse matrix format
     I = Int[]
     J = Int[]
-    V = Nothing[]
+    V = Bool[]
     for i in 1:nvertices
         if i > 1
             push!(I, perm[i])
             push!(J, perm[i - 1])
-            push!(V, nothing)
+            push!(V, true)
         end
         if i < nvertices
             push!(I, perm[i])
             push!(J, perm[i + 1])
-            push!(V, nothing)
+            push!(V, true)
         end
     end
     # We transpose I and J here
