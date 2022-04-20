@@ -8,7 +8,8 @@ export Triangulation, delaunay
 const spatial = PyNULL()
 
 function __init__()
-    return copy!(spatial, pyimport_conda("scipy.spatial", "scipy"))
+    copy!(spatial, pyimport_conda("scipy.spatial", "scipy"))
+    return nothing
 end
 
 """
