@@ -57,9 +57,9 @@ m = GeometryBasics.Mesh(points, tetras) # create tetrahedra mesh
 tris = GeometryBasics.triangle_mesh(m)
 fig, ax, pl = Makie.mesh(tris, color=rand(length(tris.position)), colormap=(:viridis, 0.5), transparency=true)
 # add wireframe plot, which actually supports tetrahedras...
-wireframe!(ax, m, color=:white)
+wireframe!(ax, m, color=:white, transparency=true)
 save("delaunay3d.png", fig)
 ```
-![delaunay3d](https://user-images.githubusercontent.com/1010467/167169584-447d1c1c-0f9f-4105-8897-cd5ad502e7d2.png)
+![delaunay3d](https://user-images.githubusercontent.com/1010467/167170353-4b27537a-e3e7-4df7-9eb2-c49229b0f70d.png)
 
 The test cases contain also examples in higher dimensions.
